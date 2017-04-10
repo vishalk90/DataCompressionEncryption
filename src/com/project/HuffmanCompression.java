@@ -1,24 +1,24 @@
 package com.project;
-
 import java.io.*;
 
 public class HuffmanCompression {
 
-    Node root = null;
+    private Node root = null;
+    private int padding = 0;
 
-    String[] huffmancode = new String[257];
-    //String[] atr = new String[512];
+    private String[] huffmancode = new String[257];
+
     private int[] inputStream;
-    StringBuffer outputStream = new StringBuffer();
+    private StringBuffer outputStream = new StringBuffer();
 
-    public HuffmanCompression() {
+    private HuffmanCompression() {
         this.root = null;
     }
 
-    public Node buildHeap(int[] heap) {
+    private Node buildHeap(int[] heap) {
 
         BuildMinHeap minHeap = new BuildMinHeap(heap);
-        //Node currentNode = root;
+
         root = minHeap.heap.get(0);
         int count = heap.length;
         for (int i : heap) {
@@ -44,20 +44,14 @@ public class HuffmanCompression {
     }
 
 
-
-
-    public void compress(int[] inputStream, String[] huffmanTree) {
-
+    private void compress(int[] inputStream) {
 
         for (int i : inputStream) {
             outputStream.append(huffmancode[i]);
-            //System.out.println(outputStream.toString());
-            //outputStream.append("*");
 
         }
-        int padding = 0;
-        //outputStream.append("*");
-        if ((padding = outputStream.length() % 8) != 0) {
+        padding = (8 - (outputStream.length() % 8));
+        if ((padding) != 0) {
             for (int i = 0; i < padding; i++) {
                 outputStream.append("0");
 
@@ -66,28 +60,22 @@ public class HuffmanCompression {
 
         }
         //System.out.println(outputStream.toString());
+
         System.out.println("Compression done Successfully!!!");
 
     }
 
 
-
-
-    public String[] getHuffmanCode(Node rootNode) {
-        //BitArray[] b = new BitArray[8];
-        //System.out.println(b.toString());
+    private String[] getHuffmanCode(Node rootNode) {
 
         if (rootNode.leftChildNode == null && rootNode.rightChildNode == null) {
 
-            //br.append(rootNode.key);
             if (rootNode.parentNode != null)
                 rootNode.hcode.append(rootNode.parentNode.hcode);
 
-            //rootNode.hcode.append("_" + rootNode.key);
             System.out.print(rootNode.hcode.toString());
             huffmancode[rootNode.key] = rootNode.hcode.toString();
             System.out.println(" " + rootNode.key);
-            //System.out.println("@" + rootNode.key);
         } else {
             if (rootNode.leftChildNode != null) {
                 //System.out.print("0");
@@ -99,7 +87,6 @@ public class HuffmanCompression {
 
             }
             if (rootNode.rightChildNode != null) {
-                //System.out.print("1");
 
                 rootNode.rightChildNode.hcode.append(rootNode.hcode);
 
@@ -113,7 +100,7 @@ public class HuffmanCompression {
     }
 
 
-    public int[] readData(FileInputStream in) throws IOException {
+    private int[] readData(FileInputStream in) throws IOException {
         try {
 
             int count;
@@ -123,20 +110,19 @@ public class HuffmanCompression {
             inputStream = new int[in.available()];
             while ((count = in.read(buffer)) != -1) {
                 for (int i = 0; i < count; i++) {
-                    //System.out.print((int) buffer[i] + 129);
 
                     inputStream[index] = (int) buffer[i] + 129;
-                    //out.write(buffer[i]);
-                    //using count sort for counting the frequency of inputstream in each buffer
+
                     frequency[((int) buffer[i] + 129)]++;
                 }
-                //System.out.println(" : value of count: " + count);
+
                 index++;
             }
+            System.out.println("original size = " + index);
             int[] heap = new int[256];
             for (int i = 1; i < frequency.length; i++) {
                 heap[i - 1] = frequency[i];
-                System.out.println(heap[i - 1]);
+                //System.out.println(heap[i - 1]);
 
             }
             return heap;
@@ -144,13 +130,11 @@ public class HuffmanCompression {
             if (in != null) {
                 in.close();
             }
-//            if (out != null) {
-//                out.close();
-//            }
+
         }
     }
 
-    public void writeData(FileOutputStream out, StringBuffer outputStream, String[] huffmanTree) throws IOException {
+    private void writeData(FileOutputStream out, StringBuffer outputStream, String[] huffmanTree) throws IOException {
         try {
             int byteArray;
             System.out.println(outputStream.length());
@@ -159,18 +143,23 @@ public class HuffmanCompression {
             for (int i = 1; i < huffmanTree.length; i++) {
                 //System.out.println(huffmanTree[i]);
                 if (huffmanTree[i] != null) {
+                    //out.write(Integer.parseInt(huffmanTree[i],2));
                     out.write(huffmanTree[i].getBytes());
                     out.write(10);
-
+                    out.write(i);
                 }
             }
+            out.write(10);
+            out.write(10);
 
-
+            out.write(padding);
 
             //int[] byteArray = new int[outputStream.length() / 8];
+            System.out.println("outstream length " + outputStream.length());
             for (int i = 0, j = 0; i < outputStream.length(); i = i + 8, j++) {
                 if (i + 7 < outputStream.length()) {
-                    byteArray = Integer.parseInt(outputStream.substring(i, i + 7), 2);
+                    byteArray = Integer.parseInt(outputStream.substring(i, i + 8), 2);
+                    //System.out.println(Integer.parseInt(outputStream.substring(i, i + 8), 2));
                     out.write(byteArray);
                 }
             }
@@ -185,9 +174,8 @@ public class HuffmanCompression {
 
 
     public static void main(String[] args) throws IOException {
-        FileInputStream in = new FileInputStream("dsa.pdf"); // setting the input file path and creating an object of file input stream
+        FileInputStream in = new FileInputStream("100.pdf"); // setting the input file path and creating an object of file input stream
         FileOutputStream out = new FileOutputStream("out.huff"); // setting the output file path and creating an object of file output stream
-
 
         HuffmanCompression e = new HuffmanCompression(); // creating an object of this class
 
@@ -198,7 +186,7 @@ public class HuffmanCompression {
 
         String[] huffmanTree = e.getHuffmanCode(rootNode); // getting a huffman code for each data
 
-        e.compress(e.inputStream, huffmanTree); // compressing inpute stream using huffman tree
+        e.compress(e.inputStream); // compressing inpute stream using huffman tree
 
         e.writeData(out, e.outputStream, huffmanTree);// writing to output file with given path
 
