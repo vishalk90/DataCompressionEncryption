@@ -44,28 +44,6 @@ public class HuffmanCompression {
     }
 
 
-    private void compress(int[] inputStream) {
-
-        for (int i : inputStream) {
-            outputStream.append(huffmancode[i]);
-
-        }
-        padding = (8 - (outputStream.length() % 8));
-        if ((padding) != 0) {
-            for (int i = 0; i < padding; i++) {
-                outputStream.append("0");
-
-            }
-            System.out.println("Yes! it has padding of " + padding + " bits");
-
-        }
-        //System.out.println(outputStream.toString());
-
-        System.out.println("Compression done Successfully!!!");
-
-    }
-
-
     private String[] getHuffmanCode(Node rootNode) {
 
         if (rootNode.leftChildNode == null && rootNode.rightChildNode == null) {
@@ -112,7 +90,7 @@ public class HuffmanCompression {
                 for (int i = 0; i < count; i++) {
 
                     inputStream[index] = (int) buffer[i] + 129;
-
+                    //System.out.println((int) buffer[i]);
                     frequency[((int) buffer[i] + 129)]++;
                 }
 
@@ -134,11 +112,13 @@ public class HuffmanCompression {
         }
     }
 
-    private void writeData(FileOutputStream out, StringBuffer outputStream, String[] huffmanTree) throws IOException {
+    private void writeData(FileOutputStream out,  String[] huffmanTree) throws IOException {
+
+
+
+
         try {
             int byteArray;
-            System.out.println(outputStream.length());
-
 
             for (int i = 1; i < huffmanTree.length; i++) {
                 //System.out.println(huffmanTree[i]);
@@ -149,13 +129,50 @@ public class HuffmanCompression {
                     out.write(i);
                 }
             }
-            out.write(10);
-            out.write(10);
+            out.write(100);
 
-            out.write(padding);
+
+            for (int i : inputStream) {
+                outputStream.append(huffmancode[i]);
+                String extraChars;
+
+                if(outputStream.length()>8192)
+                {
+                    extraChars = outputStream.substring(8192,(outputStream.length()));
+                    for (int j = 0; j < 8192; j = j + 8) {
+                        out.write(Integer.parseInt(outputStream.substring(j, j + 8), 2));
+                        //System.out.print(outputStream.toString());
+
+                    }
+
+                    //out.write(Integer.parseInt(outputStream.substring(0,8191),2));
+                    outputStream = new StringBuffer();
+                    outputStream.append(extraChars);
+                }
+            }
+
+            padding = (8 - (outputStream.length() % 8));
+
+            if ((padding) != 0) {
+                for (int i = 0; i < padding; i++) {
+                    outputStream.append("0");
+
+                }
+                System.out.println("Yes! it has padding of " + padding + " bits");
+
+            }
+            //System.out.println(outputStream.toString());
+
+
+            System.out.println("Compression done Successfully!!!");
+
+
+
+
+
 
             //int[] byteArray = new int[outputStream.length() / 8];
-            System.out.println("outstream length " + outputStream.length());
+            //System.out.println("outstream length " + outputStream.length());
             for (int i = 0, j = 0; i < outputStream.length(); i = i + 8, j++) {
                 if (i + 7 < outputStream.length()) {
                     byteArray = Integer.parseInt(outputStream.substring(i, i + 8), 2);
@@ -163,6 +180,7 @@ public class HuffmanCompression {
                     out.write(byteArray);
                 }
             }
+            out.write(padding);
 
 
         } finally {
@@ -186,9 +204,9 @@ public class HuffmanCompression {
 
         String[] huffmanTree = e.getHuffmanCode(rootNode); // getting a huffman code for each data
 
-        e.compress(e.inputStream); // compressing inpute stream using huffman tree
+        //e.compress(); // compressing inpute stream using huffman tree
 
-        e.writeData(out, e.outputStream, huffmanTree);// writing to output file with given path
+        e.writeData(out, huffmanTree);// writing to output file with given path
 
     }
 }

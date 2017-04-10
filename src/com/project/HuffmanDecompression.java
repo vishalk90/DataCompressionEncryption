@@ -20,10 +20,9 @@ public class HuffmanDecompression {
         rootNode = new Node(0, 0);
         Node n = rootNode;
         boolean flag1 = true;
-        boolean flag2 = true;
         index = 0;
 
-        while (flag1 || flag2) {
+        while (inputStream[index]!=100) {
             if (inputStream[index] == 48) {
                 if (n.leftChildNode == null) {
                     n.leftChildNode = new Node(0, n, null, null);
@@ -45,13 +44,7 @@ public class HuffmanDecompression {
                 }
                 //System.out.println("tree " + n.key);
                 n = rootNode;
-                if (!flag1) {
-                    flag2 = false;
-                } else {
                     index++;
-                }
-                flag1 = false;
-
             }
             index++;
 
@@ -60,6 +53,7 @@ public class HuffmanDecompression {
 
     private void getValueFromTree(StringBuffer huffmanCode) throws Exception {
         Node n = rootNode;
+        System.out.println("huffmancodelength "+ huffmanCode.length());
         for (int i = 0; i < (huffmanCode.length() - padding); i++) {
 
             if (huffmanCode.charAt(i) == '0') {
@@ -68,6 +62,7 @@ public class HuffmanDecompression {
                     int key = (n.key - 129);
 
                     outputStream.add(key);
+                    //System.out.println(key);
                     n = rootNode;
 
                 }
@@ -77,6 +72,7 @@ public class HuffmanDecompression {
                     int key = (n.key - 129);
 
                     outputStream.add(key);
+                    //System.out.println(key);
                     n = rootNode;
 
                 }
@@ -85,26 +81,16 @@ public class HuffmanDecompression {
             }
 
         }
+        System.out.println("outputStream.size() "+outputStream.size());
     }
 
     private void decompress() throws Exception {
 
-        System.out.println("index " + index);
-        padding = inputStream[++index];
-        System.out.println("padding " + padding);
-        System.out.println("index " + index);
-        index++;
-
-//        for (int i = index; i < inputStream.length; i++) {
-//            if (inputStream[i] < 0)
-//                System.out.println(inputStream[i] + 256);
-//            else
-//                System.out.println(inputStream[i]);
-//        }
+        ++index;
 
         StringBuffer inputStringInByte = new StringBuffer();
 
-        while (index < (inputStream.length)) {
+        while (index < ((inputStream.length)-1)) {
 
             StringBuilder temp = new StringBuilder();
             if (inputStream[index] < 0) {
@@ -125,12 +111,13 @@ public class HuffmanDecompression {
                     for (int i = 0; i < temp_len; i++) {
                         temp.insert(0, 0);
                     }
-
                 }
                 inputStringInByte.append(temp);
             }
             index++;
         }
+        //System.out.println(inputStringInByte);
+        //System.out.println("inputStringInByte.length() "+inputStringInByte.length());
         getValueFromTree(inputStringInByte);
     }
 
@@ -149,6 +136,9 @@ public class HuffmanDecompression {
                 }
                 index++;
             }
+            padding = inputStream[inputStream.length-1];
+
+            System.out.println("padding "+padding);
 
 
         } finally {
@@ -165,7 +155,6 @@ public class HuffmanDecompression {
             for (int i : outputStream) {
                 out.write(i);
             }
-            System.out.println("outputStream.size() " + outputStream.size());
             System.out.println("Decompressed successfully!!!");
 
         } finally {
@@ -178,7 +167,7 @@ public class HuffmanDecompression {
 
     public static void main(String[] args) throws Exception {
         FileInputStream in = new FileInputStream("out.huff"); // setting the input file path and creating an object of file input stream
-        FileOutputStream out = new FileOutputStream("output.txt"); // setting the output file path and creating an object of file output stream
+        FileOutputStream out = new FileOutputStream("output.jpeg"); // setting the output file path and creating an object of file output stream
 
         HuffmanDecompression d = new HuffmanDecompression();
 
