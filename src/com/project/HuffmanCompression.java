@@ -1,4 +1,5 @@
 package com.project;
+
 import java.io.*;
 
 public class HuffmanCompression {
@@ -56,8 +57,6 @@ public class HuffmanCompression {
             System.out.println(" " + rootNode.key);
         } else {
             if (rootNode.leftChildNode != null) {
-                //System.out.print("0");
-                System.out.print("");
                 rootNode.leftChildNode.hcode.append(rootNode.hcode);
 
                 rootNode.leftChildNode.hcode.append("0");
@@ -65,7 +64,6 @@ public class HuffmanCompression {
 
             }
             if (rootNode.rightChildNode != null) {
-
                 rootNode.rightChildNode.hcode.append(rootNode.hcode);
 
                 rootNode.rightChildNode.hcode.append("1");
@@ -86,9 +84,14 @@ public class HuffmanCompression {
             int[] frequency = new int[257];
             int index = 0;
             inputStream = new int[in.available()];
+            System.out.print("Reading input file");
+            int c = 0;
             while ((count = in.read(buffer)) != -1) {
                 for (int i = 0; i < count; i++) {
-
+                    c++;
+                    if (c % 1000000 == 0) {
+                        System.out.print(".");
+                    }
                     inputStream[index] = (int) buffer[i] + 129;
                     //System.out.println((int) buffer[i]);
                     frequency[((int) buffer[i] + 129)]++;
@@ -112,9 +115,7 @@ public class HuffmanCompression {
         }
     }
 
-    private void writeData(FileOutputStream out,  String[] huffmanTree) throws IOException {
-
-
+    private void writeData(FileOutputStream out, String[] huffmanTree) throws IOException {
 
 
         try {
@@ -136,9 +137,8 @@ public class HuffmanCompression {
                 outputStream.append(huffmancode[i]);
                 String extraChars;
 
-                if(outputStream.length()>8192)
-                {
-                    extraChars = outputStream.substring(8192,(outputStream.length()));
+                if (outputStream.length() > 8192) {
+                    extraChars = outputStream.substring(8192, (outputStream.length()));
                     for (int j = 0; j < 8192; j = j + 8) {
                         out.write(Integer.parseInt(outputStream.substring(j, j + 8), 2));
                         //System.out.print(outputStream.toString());
@@ -167,10 +167,6 @@ public class HuffmanCompression {
             System.out.println("Compression done Successfully!!!");
 
 
-
-
-
-
             //int[] byteArray = new int[outputStream.length() / 8];
             //System.out.println("outstream length " + outputStream.length());
             for (int i = 0, j = 0; i < outputStream.length(); i = i + 8, j++) {
@@ -192,7 +188,7 @@ public class HuffmanCompression {
 
 
     public static void main(String[] args) throws IOException {
-        FileInputStream in = new FileInputStream("100.pdf"); // setting the input file path and creating an object of file input stream
+        FileInputStream in = new FileInputStream("fb.jpeg"); // setting the input file path and creating an object of file input stream
         FileOutputStream out = new FileOutputStream("out.huff"); // setting the output file path and creating an object of file output stream
 
         HuffmanCompression e = new HuffmanCompression(); // creating an object of this class

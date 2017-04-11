@@ -22,7 +22,7 @@ public class HuffmanDecompression {
         boolean flag1 = true;
         index = 0;
 
-        while (inputStream[index]!=100) {
+        while (inputStream[index] != 100) {
             if (inputStream[index] == 48) {
                 if (n.leftChildNode == null) {
                     n.leftChildNode = new Node(0, n, null, null);
@@ -44,19 +44,23 @@ public class HuffmanDecompression {
                 }
                 //System.out.println("tree " + n.key);
                 n = rootNode;
-                    index++;
+                index++;
             }
             index++;
 
         }
     }
 
-    private void getValueFromTree(StringBuffer huffmanCode) throws Exception {
-        Node n = rootNode;
-        System.out.println("huffmancodelength "+ huffmanCode.length());
-        for (int i = 0; i < (huffmanCode.length() - padding); i++) {
+    String EXTRA = "";
 
+    private void getValueFromTree(StringBuffer huffmanCode) {
+        Node n = rootNode;
+        int extra = 0;
+        //System.out.println("huffmancodelength " + huffmanCode.length());
+
+        for (int i = 0; i < ((huffmanCode.length())); i++) {
             if (huffmanCode.charAt(i) == '0') {
+                EXTRA = EXTRA + "0";
                 n = n.leftChildNode;
                 if (n.leftChildNode == null && n.rightChildNode == null) {
                     int key = (n.key - 129);
@@ -64,9 +68,11 @@ public class HuffmanDecompression {
                     outputStream.add(key);
                     //System.out.println(key);
                     n = rootNode;
+                    EXTRA = "";
 
                 }
             } else if (huffmanCode.charAt(i) == '1') {
+                EXTRA = EXTRA + "1";
                 n = n.rightChildNode;
                 if (n.leftChildNode == null && n.rightChildNode == null) {
                     int key = (n.key - 129);
@@ -74,51 +80,65 @@ public class HuffmanDecompression {
                     outputStream.add(key);
                     //System.out.println(key);
                     n = rootNode;
-
+                    EXTRA = "";
                 }
             } else {
                 System.out.println("not found!!!!!!!!!!");
             }
 
+
         }
-        System.out.println("outputStream.size() "+outputStream.size());
     }
 
     private void decompress() throws Exception {
-
-        ++index;
+        index++; // pointer shifting to the starting position of the input sequence
 
         StringBuffer inputStringInByte = new StringBuffer();
+        //ArrayList<String> inputStringInByte = new ArrayList<>();
 
-        while (index < ((inputStream.length)-1)) {
-
+        while (index < ((inputStream.length) - 2)) {
             StringBuilder temp = new StringBuilder();
-            if (inputStream[index] < 0) {
+            if (inputStringInByte.length() < 8192) {
+                if (inputStream[index] < 0) {
 
-                temp.append(Integer.toBinaryString(inputStream[index] + 256));
-                int temp_len = (8 - temp.length());
-                if (temp_len != 0) {
-                    for (int i = 0; i < temp_len; i++) {
-                        temp.insert(0, 0);
-                    }
+                    temp.append(String.format("%8s", Integer.toBinaryString(inputStream[index] + 256)).replace(' ', '0'));
+
+                    inputStringInByte.append(temp);
+                } else {
+
+                    temp.append(String.format("%8s", Integer.toBinaryString(inputStream[index])).replace(' ', '0'));
+
+                    inputStringInByte.append(temp);
 
                 }
-                inputStringInByte.append(temp);
+                index++;
             } else {
-                temp.append(Integer.toBinaryString(inputStream[index]));
-                int temp_len = (8 - temp.length());
-                if (temp_len != 0) {
-                    for (int i = 0; i < temp_len; i++) {
-                        temp.insert(0, 0);
-                    }
-                }
-                inputStringInByte.append(temp);
+                inputStringInByte.insert(0, EXTRA);
+                getValueFromTree(inputStringInByte);
+                inputStringInByte = new StringBuffer();
+                //EXTRA = "";
             }
-            index++;
+
+
         }
-        //System.out.println(inputStringInByte);
-        //System.out.println("inputStringInByte.length() "+inputStringInByte.length());
+        // this is to get value from tree if inputStringInByte is less than 8192
+        inputStringInByte.insert(0, EXTRA);
         getValueFromTree(inputStringInByte);
+        inputStringInByte = new StringBuffer();
+        //EXTRA = "";
+
+        // this is to get the value from tree of 2nd last index
+        if (inputStream[index] < 0) {
+            inputStringInByte.insert(0, EXTRA);
+            inputStringInByte.append(String.format("%8s", Integer.toBinaryString(inputStream[index] + 256)).replace(' ', '0'));
+            getValueFromTree(inputStringInByte.replace(inputStringInByte.length() - padding, inputStringInByte.length(), ""));
+
+        } else {
+            inputStringInByte.insert(0, EXTRA);
+            inputStringInByte.append(String.format("%8s", Integer.toBinaryString(inputStream[index])).replace(' ', '0'));
+            getValueFromTree(inputStringInByte.replace(inputStringInByte.length() - padding, inputStringInByte.length(), ""));
+
+        }
     }
 
 
@@ -128,17 +148,23 @@ public class HuffmanDecompression {
             byte[] buffer = new byte[1];
             int index = 0;
             inputStream = new int[in.available()];
+            int c = 0;
+            System.out.print("Reading out.huff file");
             while ((count = in.read(buffer)) != -1) {
                 for (int i = 0; i < count; i++) {
-
+                    c++;
+                    if (c % 1000000 == 0) {
+                        System.out.print(".");
+                    }
                     inputStream[index] = (int) buffer[i];
 
                 }
                 index++;
             }
-            padding = inputStream[inputStream.length-1];
+            System.out.println();
+            padding = inputStream[inputStream.length - 1];
 
-            System.out.println("padding "+padding);
+            System.out.println("padding " + padding);
 
 
         } finally {
@@ -150,8 +176,10 @@ public class HuffmanDecompression {
 
 
     private void writeData(FileOutputStream out) throws IOException {
+
         try {
 
+            // this is to write the output to external file
             for (int i : outputStream) {
                 out.write(i);
             }
@@ -182,7 +210,6 @@ public class HuffmanDecompression {
         System.out.println();
 
         d.writeData(out);
-
 
 
     }
